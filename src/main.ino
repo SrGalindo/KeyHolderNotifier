@@ -235,49 +235,19 @@ void onMqttMessage(char* topic, byte* payload, unsigned int mlength)  {
   
     // got a new URL to play ------------------------------------------------
     if (!strcmp(topic, mqttFullTopic("play") ) ) {
-      stopPlaying();
-      file_http = new AudioFileSourceHTTPStream();
-      if ( file_http->open(newMsg)) {
-        actionPrePlay();
-        buff = new AudioFileSourceBuffer(file_http, preallocateBuffer, preallocateBufferSize);
-        mp3 = new AudioGeneratorMP3();
-        mp3->begin(buff, out);
-      } else {
-        stopPlaying();
-        broadcastStatus("status", "error");
-      }
+      audioPlay(newMsg);
     }
     // got a new URL to play ------------------------------------------------
     if ( !strcmp(topic, mqttFullTopic("stream"))) {
-      stopPlaying();
-      file_icy = new AudioFileSourceICYStream();
-      if ( file_icy->open(newMsg)) {
-        actionPrePlay();
-        buff = new AudioFileSourceBuffer(file_icy, preallocateBuffer, preallocateBufferSize);
-        mp3 = new AudioGeneratorMP3();
-        mp3->begin(buff, out);
-      } else {
-        stopPlaying();
-        broadcastStatus("status", "error");
-      }
+      audioStream(newMsg);
     }
     // got a tone request --------------------------------------------------
     if(!strcmp(topic, mqttFullTopic("tone"))){
-      stopPlaying();
-      actionPrePlay();
-      file_progmem = new AudioFileSourcePROGMEM( newMsg, sizeof(newMsg) );
-      rtttl = new AudioGeneratorRTTTL();
-      rtttl->begin(file_progmem, out);
-      stopPlaying();
+      audioTone(newMsg);
     }
     //got a TTS request ----------------------------------------------------
     if ( !strcmp(topic, mqttFullTopic("say"))) {
-      stopPlaying();
-      actionPrePlay();
-      ESP8266SAM *sam = new ESP8266SAM;
-      sam->Say(out, newMsg);
-      delete sam;
-      stopPlaying();
+      ttsSAM(newMsg);
     }
     // got a volume request, expecting double [0.0,1.0] ---------------------
     if ( !strcmp(topic, mqttFullTopic("volume"))) {
