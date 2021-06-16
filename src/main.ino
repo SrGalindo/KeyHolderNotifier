@@ -1,7 +1,3 @@
-// Example
-// mqtt: notificacion/play
-// http://192.168.1.200:8123/local/SweetChild_intro-bit128.mp3
-
 #define DEBUG_FLAG              // uncomment to enable debug mode & Serial output
   
 //needed for library
