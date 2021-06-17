@@ -9,6 +9,7 @@ Rele on pin D5
 Speaker G to Wemos G, Speaker + to Wemos RX
 
 cut songs: https://mp3cut.net/es/
-reduce song quality to 128 bpm: https://online-audio-converter.com/
+
+reduce song quality to 32000Khz Sample Rate: https://online-audio-converter.com/
 
 original idea: https://www.instructables.com/MQTT-Audio-Notifier-for-ESP8266-Play-MP3-TTS-RTTL/
