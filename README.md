@@ -7,6 +7,7 @@ http://192.168.1.200:8123/local/SweetChild_intro-bit128.mp3
 
 Rele on pin D5
 Speaker G to Wemos G, Speaker + to Wemos RX
+AP password NOT-1234
 
 cut songs: https://mp3cut.net/es/
 
