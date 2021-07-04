@@ -7,6 +7,7 @@
 #include <EEPROM.h>
 #include "PubSubClient.h"
 #include <ESP8266WiFi.h>
+#include <millisDelay.h>
 
 //Audio libraries
 #include "AudioFileSourceICYStream.h"
@@ -68,10 +69,11 @@ const float FIN_1M_300K_470K_180K    = 770;
 
 long previousMillis = 0;
 const long intervalRead = 2000;
+const long stabilizationPlugTime = 2000;
+millisDelay readDelay;
+millisDelay newPlugInsertedDelay;
 boolean previousPlayedStatusPlug[4];
 boolean justReadStatusPlug[4];
-
-boolean isNewPlugInserted;
 //End plug section
 
 WiFiManager wifiManager;
@@ -149,6 +151,8 @@ void setup() {
   DEBUG_PRINTLN("Before playing boot sound");
   playBootSound();
   DEBUG_PRINTLN("After playing boot sound");
+
+  readDelay.start(intervalRead);
 }
  
 void loop() {
@@ -157,10 +161,12 @@ void loop() {
   if (mp3   && !mp3->loop())    stopPlaying();
   if (wav   && !wav->loop())    stopPlaying();
   if (rtttl && !rtttl->loop())  stopPlaying();
-  long currentMillis = millis();
-  if (currentMillis - previousMillis >= intervalRead) {
-    previousMillis = currentMillis;
+  if (readDelay.justFinished()) {
+    readDelay.repeat();
     checkPlug();
+  }
+
+  if(newPlugInsertedDelay.justFinished()){
     compareNewPlug();
   }
 }
@@ -182,8 +188,12 @@ void compareNewPlug(){
 
 void checkPlug(){
   int sensorValue = analogRead(analogInPin);
-  DEBUG_PRINT(" sensorValue=");
+  DEBUG_PRINT("sensorValue=");
   DEBUG_PRINTLN(sensorValue);
+  if(!newPlugInsertedDelay.isRunning()){
+    newPlugInsertedDelay.start(stabilizationPlugTime);
+  }
+  
   if(sensorValue < INICIO_1M){
     justReadStatusPlug[0]=0;
     justReadStatusPlug[1]=0;
@@ -279,5 +289,7 @@ void checkPlug(){
     justReadStatusPlug[1]=1;
     justReadStatusPlug[2]=1;
     justReadStatusPlug[3]=1;
+  }else{
+    newPlugInsertedDelay.stop();
   }
 }
