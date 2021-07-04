@@ -182,10 +182,6 @@ void checkPlug(){
   int sensorValue = analogRead(analogInPin);
   DEBUG_PRINT(" sensorValue=");
   DEBUG_PRINTLN(sensorValue);
-  // char textNum[4];
-  // String auxStr=String(sensorValue);
-  // auxStr.toCharArray(textNum,4);
-  // audioTtsSam(textNum);
   if(sensorValue < INICIO_1M){
     justReadStatusPlug[0]=0;
     justReadStatusPlug[1]=0;
