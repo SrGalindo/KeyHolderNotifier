@@ -7,6 +7,15 @@ void playBootSound() {
   mp3->begin(file_progmem, out);
 }
 
+void playNoUrlSound() {
+  DEBUG_PRINTLN("playing sweet child");
+  stopPlaying();
+  actionPrePlay();
+  file_progmem = new AudioFileSourcePROGMEM(sweetChildIntro_sound, sizeof(sweetChildIntro_sound));
+  mp3 = new AudioGeneratorMP3();
+  mp3->begin(file_progmem, out);
+}
+
 void stopPlaying() {
   DEBUG_PRINTLN(F("...#"));
   DEBUG_PRINTLN(F("Interrupted!"));

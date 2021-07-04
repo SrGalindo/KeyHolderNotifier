@@ -178,11 +178,33 @@ void compareNewPlug(){
       if(justReadStatusPlug[i] == 1){
         DEBUG_PRINT("Playing sound");
         DEBUG_PRINTLN(i);
+        switch(i){
+          case 1:
+            checkPlugURL(plug1);
+            break;
+          case 2:
+            checkPlugURL(plug2);
+            break;
+          case 3:
+            checkPlugURL(plug3);
+            break;
+          case 4:
+            checkPlugURL(plug4);
+            break;
+        }
       }else{
         DEBUG_PRINT("Playing sound 5");
       }
     }
     previousPlayedStatusPlug[i] = justReadStatusPlug[i];
+  }
+}
+
+void checkPlugURL(char* plugUrl){
+  if(sizeof(plugUrl)>4){
+    audioPlay(plugUrl);
+  }else{
+    playNoUrlSound();
   }
 }
 
