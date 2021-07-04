@@ -70,6 +70,8 @@ long previousMillis = 0;
 const long intervalRead = 2000;
 boolean previousPlayedStatusPlug[4];
 boolean justReadStatusPlug[4];
+
+boolean isNewPlugInserted;
 //End plug section
 
 WiFiManager wifiManager;
@@ -163,7 +165,7 @@ void loop() {
   }
 }
 
-//////////////////////plugs methods/////////////////////////////////
+/////////////////plugs methods/////////////////////////////////////
 void compareNewPlug(){
   for(int i=0; i<4; i++){
     if(justReadStatusPlug[i] != previousPlayedStatusPlug[i]){
