@@ -1,4 +1,3 @@
-
 void mqttReconnect() {
   if (!mqttClient.connected()) {
     DEBUG_PRINTLN(F("Connecting to MQTT..."));
