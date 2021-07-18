@@ -7,6 +7,7 @@
 #include <EEPROM.h>
 #include "PubSubClient.h"
 #include <ESP8266WiFi.h>
+#include <millisDelay.h>
 
 //Audio libraries
 #include "AudioFileSourceICYStream.h"
@@ -54,7 +55,7 @@ const float FIN_1M_300K              = 621;
 const float INICIO_1M_470K_180K      = 629;
 const float FIN_1M_470K_180K         = 639;
 const float INICIO_300K_180K         = 640;
-const float FIN_300K_180K            = 652;
+const float FIN_300K_180K            = 655;
 const float INICIO_300K_470K         = 674;
 const float FIN_300K_470K            = 679;
 const float INICIO_1M_300K_180K      = 687;
@@ -68,10 +69,11 @@ const float FIN_1M_300K_470K_180K    = 770;
 
 long previousMillis = 0;
 const long intervalRead = 2000;
+const long stabilizationPlugTime = 2000;
+millisDelay readDelay;
+millisDelay newPlugInsertedDelay;
 boolean previousPlayedStatusPlug[4];
 boolean justReadStatusPlug[4];
-
-boolean isNewPlugInserted;
 //End plug section
 
 WiFiManager wifiManager;
@@ -114,6 +116,8 @@ char plug4[80];
 
 //Rele
 #define relePin D5
+
+boolean factoryReset = false;
  
 void setup() {
   Serial.begin(115200);
@@ -137,6 +141,14 @@ void setup() {
   DEBUG_PRINTLN(mqtt_password);
   DEBUG_PRINT(F("topic --> "));
   DEBUG_PRINTLN(mqtt_topic);
+  DEBUG_PRINT(F("plug1 --> "));
+  DEBUG_PRINTLN(plug1);
+  DEBUG_PRINT(F("plug2 --> "));
+  DEBUG_PRINTLN(plug2);
+  DEBUG_PRINT(F("plug3 --> "));
+  DEBUG_PRINTLN(plug3);
+  DEBUG_PRINT(F("plug4 --> "));
+  DEBUG_PRINTLN(plug4);
 
   mqttClient.setServer(mqtt_server, atoi(mqtt_port));
   mqttClient.setCallback(onMqttMessage);
@@ -149,18 +161,23 @@ void setup() {
   DEBUG_PRINTLN("Before playing boot sound");
   playBootSound();
   DEBUG_PRINTLN("After playing boot sound");
+
+  readDelay.start(intervalRead);
 }
  
 void loop() {
+  checkFactoryReset();
   mqttReconnect();
   mqttClient.loop();
   if (mp3   && !mp3->loop())    stopPlaying();
   if (wav   && !wav->loop())    stopPlaying();
   if (rtttl && !rtttl->loop())  stopPlaying();
-  long currentMillis = millis();
-  if (currentMillis - previousMillis >= intervalRead) {
-    previousMillis = currentMillis;
+  if (readDelay.justFinished()) {
+    readDelay.repeat();
     checkPlug();
+  }
+
+  if(newPlugInsertedDelay.justFinished()){
     compareNewPlug();
   }
 }
@@ -172,6 +189,20 @@ void compareNewPlug(){
       if(justReadStatusPlug[i] == 1){
         DEBUG_PRINT("Playing sound");
         DEBUG_PRINTLN(i);
+        switch(i){
+          case 1:
+            checkPlugURL(plug1);
+            break;
+          case 2:
+            checkPlugURL(plug2);
+            break;
+          case 3:
+            checkPlugURL(plug3);
+            break;
+          case 4:
+            checkPlugURL(plug4);
+            break;
+        }
       }else{
         DEBUG_PRINT("Playing sound 5");
       }
@@ -180,10 +211,22 @@ void compareNewPlug(){
   }
 }
 
+void checkPlugURL(char* plugUrl){
+  if(strlen(plugUrl)>4){
+    audioPlay(plugUrl);
+  }else{
+    playNoUrlSound();
+  }
+}
+
 void checkPlug(){
   int sensorValue = analogRead(analogInPin);
-  DEBUG_PRINT(" sensorValue=");
+  DEBUG_PRINT("sensorValue=");
   DEBUG_PRINTLN(sensorValue);
+  if(!newPlugInsertedDelay.isRunning()){
+    newPlugInsertedDelay.start(stabilizationPlugTime);
+  }
+  
   if(sensorValue < INICIO_1M){
     justReadStatusPlug[0]=0;
     justReadStatusPlug[1]=0;
@@ -279,5 +322,7 @@ void checkPlug(){
     justReadStatusPlug[1]=1;
     justReadStatusPlug[2]=1;
     justReadStatusPlug[3]=1;
+  }else{
+    newPlugInsertedDelay.stop();
   }
 }

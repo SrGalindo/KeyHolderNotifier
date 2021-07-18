@@ -1,24 +1,26 @@
 void mqttReconnect() {
-  if (!mqttClient.connected()) {
-    DEBUG_PRINTLN(F("Connecting to MQTT..."));
-    String ChipId = String(random(0xffff), HEX);
-    String thingName = String("Notificador - ") + ChipId;
+  if(strlen(mqtt_server)>8){
+    if (!mqttClient.connected()) {
+      DEBUG_PRINTLN(F("Connecting to MQTT..."));
+      String ChipId = String(random(0xffff), HEX);
+      String thingName = String("Notificador - ") + ChipId;
 
-    //if (mqttClient.connect(thingName.c_str(), mqtt_user, mqtt_password)) {
-    if (mqttClient.connect(thingName.c_str(), mqtt_user, mqtt_password, mqttFullTopic(willTopic), willQoS, willRetain, willMessage)) {
-      mqttClient.subscribe(mqttFullTopic("play"));
-      mqttClient.subscribe(mqttFullTopic("stream"));
-      mqttClient.subscribe(mqttFullTopic("tone"));
-      mqttClient.subscribe(mqttFullTopic("say"));
-      mqttClient.subscribe(mqttFullTopic("stop"));
-      mqttClient.subscribe(mqttFullTopic("volume"));
-      mqttClient.subscribe(mqttFullTopic("FACTORY-RESET"));
-      DEBUG_PRINTLN(F("Connected to MQTT"));
+      //if (mqttClient.connect(thingName.c_str(), mqtt_user, mqtt_password)) {
+      if (mqttClient.connect(thingName.c_str(), mqtt_user, mqtt_password, mqttFullTopic(willTopic), willQoS, willRetain, willMessage)) {
+        mqttClient.subscribe(mqttFullTopic("play"));
+        mqttClient.subscribe(mqttFullTopic("stream"));
+        mqttClient.subscribe(mqttFullTopic("tone"));
+        mqttClient.subscribe(mqttFullTopic("say"));
+        mqttClient.subscribe(mqttFullTopic("stop"));
+        mqttClient.subscribe(mqttFullTopic("volume"));
+        mqttClient.subscribe(mqttFullTopic("FACTORY-RESET"));
+        DEBUG_PRINTLN(F("Connected to MQTT"));
 
-      broadcastStatus("LWT", "online");
-      broadcastStatus("ThingName", thingName.c_str());
-      broadcastStatus("IPAddress", WiFi.localIP().toString());
-      broadcastStatus("status", "pausa");
+        broadcastStatus("LWT", "online");
+        broadcastStatus("ThingName", thingName.c_str());
+        broadcastStatus("IPAddress", WiFi.localIP().toString());
+        broadcastStatus("status", "pausa");
+      }
     }
   }
 }
@@ -68,9 +70,7 @@ void onMqttMessage(char* topic, byte* payload, unsigned int mlength)  {
       DEBUG_PRINTLN("In factory reset");
       if(!strcmp(newMsg, "YES")){
         DEBUG_PRINTLN("Reseting from factory");
-        clearEEPROM();
-        wifiManager.resetSettings();
-        ESP.reset();
+        factoryReset = true;
       }
     }
   }
