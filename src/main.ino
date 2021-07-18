@@ -55,7 +55,7 @@ const float FIN_1M_300K              = 621;
 const float INICIO_1M_470K_180K      = 629;
 const float FIN_1M_470K_180K         = 639;
 const float INICIO_300K_180K         = 640;
-const float FIN_300K_180K            = 652;
+const float FIN_300K_180K            = 655;
 const float INICIO_300K_470K         = 674;
 const float FIN_300K_470K            = 679;
 const float INICIO_1M_300K_180K      = 687;
@@ -116,6 +116,8 @@ char plug4[80];
 
 //Rele
 #define relePin D5
+
+boolean factoryReset = false;
  
 void setup() {
   Serial.begin(115200);
@@ -139,6 +141,14 @@ void setup() {
   DEBUG_PRINTLN(mqtt_password);
   DEBUG_PRINT(F("topic --> "));
   DEBUG_PRINTLN(mqtt_topic);
+  DEBUG_PRINT(F("plug1 --> "));
+  DEBUG_PRINTLN(plug1);
+  DEBUG_PRINT(F("plug2 --> "));
+  DEBUG_PRINTLN(plug2);
+  DEBUG_PRINT(F("plug3 --> "));
+  DEBUG_PRINTLN(plug3);
+  DEBUG_PRINT(F("plug4 --> "));
+  DEBUG_PRINTLN(plug4);
 
   mqttClient.setServer(mqtt_server, atoi(mqtt_port));
   mqttClient.setCallback(onMqttMessage);
@@ -156,6 +166,7 @@ void setup() {
 }
  
 void loop() {
+  checkFactoryReset();
   mqttReconnect();
   mqttClient.loop();
   if (mp3   && !mp3->loop())    stopPlaying();
@@ -201,7 +212,7 @@ void compareNewPlug(){
 }
 
 void checkPlugURL(char* plugUrl){
-  if(sizeof(plugUrl)>4){
+  if(strlen(plugUrl)>4){
     audioPlay(plugUrl);
   }else{
     playNoUrlSound();

@@ -9,6 +9,10 @@ Rele on pin D5
 Speaker G to Wemos G, Speaker + to Wemos RX
 AP password NOT-1234
 
+MQTT:
+
+notificador, notificador, 1883, notificacion
+
 cut songs: https://mp3cut.net/es/
 
 reduce song quality to 32000Khz Sample Rate: https://online-audio-converter.com/

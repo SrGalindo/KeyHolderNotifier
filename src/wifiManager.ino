@@ -1,7 +1,9 @@
 void wifiSetup(){
   EEPROM.begin(512);
-  //For testing
-  //clearEEPROM();
+
+  DEBUG_PRINT("WiFi.SSID(): ");
+  DEBUG_PRINTLN(WiFi.SSID());
+  
    
   readStringFromEEPROM(0, mqtt_server, 40);
   readStringFromEEPROM(40,mqtt_topic,34);
@@ -42,9 +44,6 @@ void wifiSetup(){
   WiFiManagerParameter custom_plug3("plug3", "URL song for Plug 3", plug3, 80);
   WiFiManagerParameter custom_plug4("plug4", "URL song for Plug 4", plug4, 80);
 
-  //reset settings - for testing
-  //wifiManager.resetSettings();
- 
   //set callback that gets called when connecting to previous WiFi fails, and enters Access Point mode
   wifiManager.setAPCallback(configModeCallback);
  
@@ -146,4 +145,13 @@ void clearEEPROM(){
     EEPROM.write(i, 0);
   }
   EEPROM.commit();
+}
+
+void checkFactoryReset(){
+  if(factoryReset){
+    //clearEEPROM();
+    wifiManager.resetSettings();
+    ESP.restart();
+    delay(5000);
+  }
 }
